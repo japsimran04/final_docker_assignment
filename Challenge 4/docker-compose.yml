@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+  api-server:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - "3000"
+    environment:
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: ${DB_HOST}
+    depends_on:
+      - db
+    deploy:
+      replicas: 3
+
+  reverse-proxy:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - api-server
+
+  db:
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3306:3306"
